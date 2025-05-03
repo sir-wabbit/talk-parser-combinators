@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Parser Combinators Presentation</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+
+    <style>
+      table a:link {
+        color: #666;
+        font-weight: bold;
+        text-decoration:none;
+      }
+      table a:visited {
+        color: #999999;
+        font-weight:bold;
+        text-decoration:none;
+      }
+      table a:active,
+      table a:hover {
+        color: #bd5a35;
+        text-decoration:underline;
+      }
+      table {
+        <!-- font-family:Arial, Helvetica, sans-serif; -->
+        color:#666;
+        font-size:15px;
+        text-shadow: 1px 1px 0px #fff;
+        background:#eaebec;
+        margin:20px;
+        border:#ccc 1px solid;
+
+        -moz-border-radius:3px;
+        -webkit-border-radius:3px;
+        border-radius:3px;
+
+        -moz-box-shadow: 0 1px 2px #d1d1d1;
+        -webkit-box-shadow: 0 1px 2px #d1d1d1;
+        box-shadow: 0 1px 2px #d1d1d1;
+      }
+      table th {
+        padding:21px 25px 22px 25px;
+        border-top:1px solid #fafafa;
+        border-bottom:1px solid #e0e0e0;
+
+        background: #ededed;
+        background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#ebebeb));
+        background: -moz-linear-gradient(top,  #ededed,  #ebebeb);
+      }
+      table th:first-child {
+        text-align: left;
+        padding-left:20px;
+      }
+      table tr:first-child th:first-child {
+        -moz-border-radius-topleft:3px;
+        -webkit-border-top-left-radius:3px;
+        border-top-left-radius:3px;
+      }
+      table tr:first-child th:last-child {
+        -moz-border-radius-topright:3px;
+        -webkit-border-top-right-radius:3px;
+        border-top-right-radius:3px;
+      }
+      table tr {
+        text-align: center;
+        padding-left:20px;
+      }
+      table td:first-child {
+        text-align: left;
+        padding-left:20px;
+        border-left: 0;
+      }
+      table td {
+        padding:18px;
+        border-top: 1px solid #ffffff;
+        border-bottom:1px solid #e0e0e0;
+        border-left: 1px solid #e0e0e0;
+
+        background: #fafafa;
+        background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));
+        background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);
+      }
+      table tr.even td {
+        background: #f6f6f6;
+        background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f8), to(#f6f6f6));
+        background: -moz-linear-gradient(top,  #f8f8f8,  #f6f6f6);
+      }
+      table tr:last-child td {
+        border-bottom:0;
+      }
+      table tr:last-child td:first-child {
+        -moz-border-radius-bottomleft:3px;
+        -webkit-border-bottom-left-radius:3px;
+        border-bottom-left-radius:3px;
+      }
+      table tr:last-child td:last-child {
+        -moz-border-radius-bottomright:3px;
+        -webkit-border-bottom-right-radius:3px;
+        border-bottom-right-radius:3px;
+      }
+      table tr:hover td {
+        background: #f2f2f2;
+        background: -webkit-gradient(linear, left top, left bottom, from(#f2f2f2), to(#f0f0f0));
+        background: -moz-linear-gradient(top,  #f2f2f2,  #f0f0f0);
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+#Parser Combinators
+
+---
+layout: false
+.left-column[
+  ## About me
+]
+.right-column[
+* Working on information extraction from social media and newswire.
+* Code mostly in Python, hack in functional languages (Scala, Haskell, F#, etc).
+]
+
+---
+layout: false
+.left-column[
+  ## Options
+  ### Cargo cult parsing
+]
+.right-column[
+* Cargo cult parsing: the use of "magic" regular expressions -- often cut and pasted directly from Google search results.
+* Regular expressions:
+  + Available in almost every language
+  + WYSIWIG as compared to WYSIWIGIYULR(k) (or your personal favourite grammar class).
+  + Completely inadequate for fundamentally irregular languages (work "most of the time").
+]
+
+---
+layout: false
+.left-column[
+  ## Options
+  ### Cargo cult parsing
+  ### Parser generators
+]
+.right-column[
+* Have large upfront tax (LL, LR, LALR).
+* Hard to integrate, aren't in-language.
+* An arduous and clumsy affair.
+* Require separate tools, hard to modify.
+* But in the end you get efficient and powerful parsers.
+]
+
+---
+layout: false
+.left-column[
+  ## Options
+  ### Cargo cult parsing
+  ### Parser generators
+  ### Hand-written parsers
+]
+.right-column[
+* Bugs!
+* Easy to tweak.
+* Difficult to develop and test.
+* Difficult to optimize.
+]
+
+---
+layout: false
+.left-column[
+  ## Options
+  ### Cargo cult parsing
+  ### Parser generators
+  ### Hand-written parsers
+  ### Parser combinators
+]
+.right-column[
+* Modular, TDD-friendly.
+* User-friendly default error messages (depends).
+* Closely resemble normal functions (sometimes are normal functions).
+* Use of closures borders on pathological.
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+Take a string, produce a value:
+
+```scala
+type Parser[+T] = String => T
+```
+
+- No way to indicate failure.
+- Does not compose.
+
+```scala
+def seq[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)] =
+  { s0: String =>
+    ???
+  }
+```
+
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+Take a string, produce a value **together with the remaining part of the string**:
+
+```scala
+type Parser[+T] = String => (T, String)
+
+def seq[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)] =
+  { s0: String =>
+    val (a, s1) = a(s0)
+    val (b, s2) = b(s1)
+    ((a, b), s2)
+  }
+```
+
+Still no way to handle a failure.
+
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+Take a string, produce **an optional** value together with the remaining part of the string:
+
+```scala
+type Parser[+T] = String => Option[(T, String)]
+
+def seq[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)] =
+  { s0: String =>
+    for {
+      (a, s1) <- a(s0)
+      (b, s2) <- b(s1)
+    } yield ((a, b), s2)
+  }
+```
+
+What about ambiguous grammars?
+
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+Take a string, produce **a list of** results:
+
+```scala
+type Parser[+T] = String => List[(T, String)]
+
+def seq[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)] =
+  { s0: String =>
+    for {
+      (a, s1) <- a(s0)
+      (b, s2) <- b(s1)
+    } yield ((a, b), s2)
+  }
+```
+
+What if we want better error reporting?
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+Take a string, produce **either an error or some value with the remainding part of the string**:
+
+```scala
+type ParserError = String
+type Parser[+T] = String => Either[ParserError, (T, String)]
+
+def seq[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)] =
+  { s0: String =>
+    for {
+      (a, s1) <- a(s0).right
+      (b, s2) <- b(s1).right
+    } yield ((a, b), s2)
+  }
+```
+
+How about keeping the surface-level representation of the parsed value?
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+Take a string, produce **an optional value with the remainding part of the string and the consumed part of the string**:
+
+```scala
+type Parser[+T] = String => Option[(String, T, String)]
+
+def seq[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)] =
+  { s0: String =>
+    for {
+      (c1, a, s1) <- a(s0)
+      (c2, b, s2) <- b(s1)
+    } yield (c1 + c2, (a, b), s2)
+  }
+```
+
+What if we want to parse an array of bytes?
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+
+```scala
+type Parser[E, +T] = Stream[E] => Option[(Vector[E], T, Stream[E])]
+
+def seq[E, A, B]
+(pa: Parser[E, A], pb: Parser[E, B]): Parser[E, (A, B)] =
+  { s0: Stream[E] =>
+    for {
+      (c1, a, s1) <- a(s0)
+      (c2, b, s2) <- b(s1)
+    } yield (c1 ++ c2, (a, b), s2)
+  }
+```
+]
+
+---
+.left-column[
+  ## What is a parser?
+]
+.right-column[
+
+What did all of our examples have in common?
+
+```scala
+type S[+T] // Stream.
+type R[+T] // Result Monad (Applicative).
+type P[E, +T] = S[E] => R[(T, S[E])]
+```
+
+Take an input stream, produce some monadic value containing pairs of values and stream tails.
+]
+
+---
+.left-column[
+  ## Frameworks
+]
+.right-column[
+
+<table>
+  <tr><th>Name</th> <th>Easy</th> <th>Docs</th><th>Modifiablity</th> <th>Speed</th> </tr>
+  <tr><td>WabbitParse</td> <td>+++</td> <td>---</td> <td>+++</td> <td>---</td></tr>
+  <tr><td>Parboiled2</td> <td>++</td> <td>+</td> <td>---</td> <td>+++</td></tr>
+  <tr><td>Fastparse</td> <td>++</td> <td>++</td> <td>-</td> <td>++</td></tr>
+  <tr><td>GLL-combinators</td> <td>++</td> <td>+</td> <td>+</td> <td>+</td> </tr>
+  <tr><td>scala-parser-combinators</td> <td>+++</td> <td>+++</td> <td>-</td> <td>--</td> </tr>
+  <tr><td>Hand-written</td> <td>--</td> <td>+++</td> <td>--</td> <td>+++</td> </tr>
+  <tr><td>Parser generators</td> <td>---</td> <td>+++</td> <td>---</td> <td>+++</td> </tr>
+</table>
+
+]
+
+---
+name: last-page
+template: inverse
+
+## The end.
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    <script>
+      var hljs = remark.highlighter.engine;
+    </script>
+    <script src="remark.language.js"></script>
+    <script>
+      var slideshow = remark.create({
+          highlightStyle: 'monokai',
+          highlightLanguage: 'remark'
+        }) ;
+    </script>
+  </body>
+</html>
