@@ -1,6 +1,25 @@
+.DS_Store
+Thumbs.db
+
+# Temporary scratch space
+/tmp/
+/.tmp/
+/tmp-*/
+/tmp_*/
+/tmp.*/
+/.tmp-*/
+/.tmp_*/
+/.tmp.*/
+tmp-*
+tmp_*
+tmp.*
+.tmp-*
+.tmp_*
+.tmp.*
+*.bak
+
 *.class
 *.log
-
 # sbt specific
 .cache/
 .history/
@@ -12,7 +31,6 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
-
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
